@@ -1,0 +1,19 @@
+{
+  "name": "tally-timer",
+  "version": "1.0.0",
+  "description": "creates report of how long a tally has been on",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "buffer-split": "^1.0.0",
+    "jspack": "0.0.4",
+    "keypress": "^0.2.1",
+    "net": "^1.0.2",
+    "packet": "0.0.7"
+  }
+}
