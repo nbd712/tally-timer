@@ -2,7 +2,7 @@
 
 Tally timer is a scripty thing that I shittily threw together. It will take in tally data from a control system (in theory connected to a switcher) and record the amount of time in milliseconds that the tally lamp is on. 
 
-##Starting it up
+## Starting it up
 - Clone the repo
 - `npm install`
 - Change addresses in `index.js`
