@@ -1,21 +1,27 @@
-
-
 const net = require('net');
 const bsplit = require('buffer-split')
 const jspack = require('jspack').jspack
 const keypress = require('keypress')
 const fs = require('fs');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 //const parser = require('packet').createPacketizer().createParser();
 
 keypress(process.stdin);
 var tallies = {};
 const file_date = new Date();
+const month = file_date.getMonth();
+const day = file_date.getDate();
+const year = file_date.getFullYear();
+const hours = file_date.getHours();
+const minutes = file_date.getMinutes();
+const path_pfx = `./${month}-${day}-${year}-${hours}-${minutes}`
 
 class Index {
 	constructor(tally_obj) {
 		this.duration = 0;
 		this.timer1 = null;
 		this.updateControl(tally_obj);
+		this.counter = 0;
 	}
 
 	updateControl(obj) {
@@ -24,11 +30,13 @@ class Index {
 		this.text_tally = obj.control.text_tally;
 		this.brightness = obj.control.brightness;
 		this.text = obj.TEXT;
+		this.index = obj.INDEX[0];
 
 		if (this.text_tally > 0 || this.rh_tally > 0 || this.lh_tally > 0) {
 			//two options, start timer if not running or do nothing
 			if (this.timer1 == null) { //timer stopped
-				console.log(this.text + ' on air.')
+				console.log(this.text + ' => PGM')
+				this.counter ++;
 				this.timer1 = Date.now();
 				writeToDisk()
 			} else {
@@ -37,7 +45,7 @@ class Index {
 		} else {
 			//two options, either stop timer if running, or do nothing
 			if (this.timer1 != null) {
-				console.log(this.text + " off air.")
+				console.log(this.text + " => Null") //Sorry not sorry.
 				this.duration += Date.now() - this.timer1;
 				this.timer1 = null;
 				writeToDisk()
@@ -134,15 +142,14 @@ var parse = function(data) {
 }
 
 var writeToDisk = function() {
-	let month = file_date.getMonth();
-	let day = file_date.getDate();
-	let year = file_date.getFullYear();
-	let hours = file_date.getHours();
-	let minutes = file_date.getMinutes();
-
-
-	let path = `./${month}-${day}-${year}-${hours}-${minutes}.json`
+	let path = `${path_pfx}.json`
   	fs.writeFileSync(path, JSON.stringify(tallies, null, 2))
+}
+
+var writeCSVToDisk = function(data) {
+	let write_data = data.join("\n")
+	let path = `${path_pfx}.csv`
+	fs.writeFileSync(path, write_data)
 }
 
 function msToTime (ms) {
@@ -155,20 +162,27 @@ function msToTime (ms) {
         return hours + ':' + minutes + ':' + seconds;
     }
 
+
 process.stdin.on('keypress', function (ch, key) {
   //console.log('got "keypress"', key);
   if (key && key.ctrl && key.name == 'c') {
+  	var csv_data = ["index, text, duration, counter"];
   	console.clear();
   	console.log()
   	console.log("Printing report:")
+  	console.log("Start time: " + file_date)
+  	console.log("End time: " + new Date())
   	Object.values(tallies).forEach((item) => {
-  		console.log(`${item.text} has been on for ${msToTime(item.duration)}`)
+  		console.log(`${item.text} has been on ${item.counter} times for ${msToTime(item.duration)}`)
+  		csv_data.push(`${item.index},${item.text},${item.duration},${item.counter}`);
   	})
+  	//console.log('csv_data', csv_data);
+  	writeCSVToDisk(csv_data);
     process.stdin.pause();
     process.exit();
   }
   if (key && key.ctrl && key.name == "p") {
-  	console.log('writing variables to disk')
+  	console.log('Writing to disk...')
   	writeToDisk();
   }
 });
