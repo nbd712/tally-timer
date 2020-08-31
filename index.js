@@ -3,8 +3,6 @@ const bsplit = require('buffer-split')
 const jspack = require('jspack').jspack
 const keypress = require('keypress')
 const fs = require('fs');
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-//const parser = require('packet').createPacketizer().createParser();
 
 keypress(process.stdin);
 var tallies = {};
@@ -45,7 +43,7 @@ class Index {
 		} else {
 			//two options, either stop timer if running, or do nothing
 			if (this.timer1 != null) {
-				console.log(this.text + " => Null") //Sorry not sorry.
+				console.log(this.text + " => Null")
 				this.duration += Date.now() - this.timer1;
 				this.timer1 = null;
 				writeToDisk()
